@@ -1,9 +1,15 @@
 # %% all standard python modules
 import json
-import pandas as pd
+from pathlib import Path
 import requests
+import pandas as pd
 import urllib.parse
 import xml.etree.ElementTree as ET
+
+
+HERE = Path(__file__).parent
+ICSD_PKL = str(HERE/"icsd_cifs.pkl")
+ICSD_CREDENTIALS_JSON = str(HERE/"icsd_credentials.json")
 
 
 class ICSD_Session():
@@ -135,10 +141,9 @@ def download_all(loginid, password, saved_file, min_N=1, max_N=22):
 
 
 if __name__ == "__main__":
-    with open("icsd_credentials.json", "r") as f:
+    with open(ICSD_CREDENTIALS_JSON, "r") as f:
         credentials = json.load(f)
-
     usrname = credentials["loginid"]
     passwrd = credentials["password"]
-    download_all(usrname, passwrd, "all_icsd_cifs.pkl",8,8)
+    download_all(usrname, passwrd, ICSD_PKL, 9,9)
 

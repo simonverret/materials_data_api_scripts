@@ -4,11 +4,12 @@ import pandas as pd  ## provides a fast spreadsheet object (DataFrame)
 from pathlib import Path  ## for os-agnostic paths
 from copy import deepcopy
 import numpy as np
+import json
 
 
 HERE = Path(__file__).parent
-FILE_STR = str(HERE/"materials_project_full_dataframe_2")
-API_KEY = "41K885Dm2G3OqCcg0G"
+MATERIALS_PROJECT_PKL = str(HERE/"materials_project.pkl")
+API_KEY_JSON = str(HERE/"api_key.json")
 
 
 # available properties and description are hard to find, see:
@@ -92,6 +93,7 @@ ALL_KNOWN_PROPERTIES = [
 
 def download_all_materials_project(
     apikey, 
+    min_nelements=1, 
     max_nelements=10, 
     max_nsites=500, 
     nsites_step=500,
@@ -119,7 +121,7 @@ def download_all_materials_project(
     rester = MPRester(apikey)
     list_of_dict = []
     print("downloading 125k items (multiple queries required)")
-    for nelements in range(1, max_nelements+1):
+    for nelements in range(min_nelements, max_nelements+1):
         for nsites in range(1, max_nsites, nsites_step+1):
             query = rester.query(
                 criteria= {
@@ -153,13 +155,15 @@ def unfold_magnetism(mp_list):
 
 
 def main():
-    mp_list = download_all_materials_project(API_KEY)
+    with open(API_KEY_JSON, "r") as f:
+        api_key = json.load(f)["api_key"]
+    mp_list = download_all_materials_project(api_key)
     mp_list_w_mag = unfold_magnetism(mp_list)
     df = pd.DataFrame(mp_list_w_mag)
     try: df['efermi'] = df['efermi'].replace('None', np.nan )  # bug: string "None" instead of NoneType None
     except KeyError: pass
     print("saving")
-    df.to_pickle(f"{FILE_STR}.pkl")
+    df.to_pickle(MATERIALS_PROJECT_PKL)
     print(f"{len(df)} materials saved")
 
 

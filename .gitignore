@@ -4,3 +4,5 @@
 *.pdf
 *.png
 icsd/icsd_credentials.json
+mp/api_key.json
+env

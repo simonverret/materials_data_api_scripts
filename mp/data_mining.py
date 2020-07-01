@@ -4,9 +4,10 @@ from pathlib import Path  ## for os-agnostic paths
 import matplotlib.pyplot as plt  ## standard python plotting tool
 
 HERE = Path(__file__).parent
-DATAFILE = str(HERE/"materials_project_full_dataframe.pkl")
-PLOTS = HERE/"plots"
-mpdf = pd.read_pickle(DATAFILE)
+MATERIALS_PROJECT_PKL = str(HERE/"materials_project_all.pkl")
+PLOTS_DIR = HERE/"plots"
+
+mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
 print(f"loaded {len(mpdf)} materials")
 
 
@@ -100,7 +101,7 @@ print(f"{len(mag_hubbard_stable)} magnetic stable with U")
 print(f"{len(mag_not_hubbard_stable)} magnetic stable without U") 
 
 
-#%% PLOT ENERGY HUBBARD
+#%% PLOTS_DIR ENERGY HUBBARD
 bins = 200
 prop = 'formation_energy_per_atom'
 plt.suptitle(prop)
@@ -136,7 +137,7 @@ plt.figure(figsize=(20,4))
 plt.bar(list_of_elements, list_of_counts)
 plt.xlim([-0.5,len(list_of_elements)-0.5])
 plt.tight_layout()
-plt.savefig('element_bar.png')
+plt.savefig(PLOTS_DIR/'element_bar.png')
 
 #%% CIF ACCESS EXAMPLE:
 

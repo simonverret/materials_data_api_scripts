@@ -2,9 +2,10 @@
 
 This repository contains scripts to download the data from:
 - ICSD (requires credentials)
-- Materials project (requires `pip install pymatgen`)
+- Materials project (with pymatgen)
 - OQMD (in progress)
-In the end, I aim at using only the they all have REST API
+
+The end goal of this project is to rely solely on python official modules.
 
 ## Requirements
 install the requirements manually:

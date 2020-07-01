@@ -19,37 +19,9 @@ def get_database_code(cif_str):
 def get_formula(cif_str):
     return find_str_between("_chemical_formula_sum ", "\n", cif_str).remove(" ")
 
-#%%
 
 icdf = pd.read_pickle("all_icsd_cifs.pkl")
 mpdf = pd.read_pickle("../MP/materials_project_full_dataframe.pkl")
-
-#%%
-icdf = pd.read_parquet("all_icsd_cifs.parquet")
-icdf.to_pickle("all_icsd_cifs_bkp.pkl")
-
-
-# #%%
-# for ii in range(len(mpdf)):
-#     if mpdf.icsd_ids[ii]:
-
-#         mp_formula = mpdf.pretty_formula[ii]
-#         icsd_ids = mpdf.icsd_ids[ii]
-#         print(f"MP {mp_formula}  in ICSD:")
-#         # print(f"  icsd_ids: {icsd_ids}")
-#         for icsd_id in icsd_ids:
-#             entry = icdf.loc[icdf['_database_code_ICSD']==str(icsd_id)]
-#             try:
-#                 cif = entry.iloc[0]['cif']  ## it is complicated to extract the string from a dataframe
-#                 cif_as_list = robust_str_split(cif)
-#                 icsd_formula = cif_as_list[cif_as_list.index('_chemical_formula_structural')+1]
-#                 print(f"  {icsd_formula}")
-#             except:
-#                 pass
-#         # break
-
-
-#%%
 
 new_column_list = [
     '_database_code_ICSD',
@@ -76,3 +48,24 @@ for cif_row_str in new_column_list:
     icdf[cif_row_str] = icdf['cif'].apply(tmp_function)
 
 icdf
+
+
+
+# #%%
+# for ii in range(len(mpdf)):
+#     if mpdf.icsd_ids[ii]:
+
+#         mp_formula = mpdf.pretty_formula[ii]
+#         icsd_ids = mpdf.icsd_ids[ii]
+#         print(f"MP {mp_formula}  in ICSD:")
+#         # print(f"  icsd_ids: {icsd_ids}")
+#         for icsd_id in icsd_ids:
+#             entry = icdf.loc[icdf['_database_code_ICSD']==str(icsd_id)]
+#             try:
+#                 cif = entry.iloc[0]['cif']  ## it is complicated to extract the string from a dataframe
+#                 cif_as_list = robust_str_split(cif)
+#                 icsd_formula = cif_as_list[cif_as_list.index('_chemical_formula_structural')+1]
+#                 print(f"  {icsd_formula}")
+#             except:
+#                 pass
+#         # break
