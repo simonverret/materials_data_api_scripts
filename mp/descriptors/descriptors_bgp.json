@@ -1,0 +1,23 @@
+[
+    "atomic mass",
+    "magp_atomic_volume",
+    "cohesive energy",
+    "column",
+    "magp_covalent_radius",
+    "magp_density",
+    "electron affinity",
+    "electronegativity",
+    "magnetic_moment",
+    "polarizability",
+    "row",
+    "magp_boiling_point",
+    "magp_melting_point",
+    "unfilled_d",
+    "unfilled_f",
+    "unfilled",
+    "valence_d",
+    "valence_f",
+    "valence_p",
+    "valence_s",
+    "magp_valence"
+]

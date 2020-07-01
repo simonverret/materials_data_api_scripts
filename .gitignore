@@ -1,0 +1,6 @@
+*.pkl
+*.parquet
+*.feather
+*.pdf
+*.png
+icsd/icsd_credentials.json

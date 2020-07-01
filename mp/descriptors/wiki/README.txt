@@ -1,0 +1,1 @@
+Valence number taken from Wikipedia's 'List of elements by atomic properties' page.
