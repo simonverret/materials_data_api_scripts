@@ -5,11 +5,12 @@ This repository contains scripts to download the data from:
 - Materials project (with pymatgen)
 - OQMD (in progress)
 
-The end goal of this project is to rely solely on python official modules.
+The goal of this project is to rely on the strict minimum of external dependencies.
 
 ## Requirements
 install the requirements manually:
 
+    pip install requests
     pip install pandas
     pip install pymatgen  # for materials project only 
 
