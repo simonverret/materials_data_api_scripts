@@ -120,7 +120,7 @@ def download_all_materials_project(
     """
     rester = MPRester(apikey)
     list_of_dict = []
-    print("downloading 125k items (multiple queries required)")
+    print("downloading items (multiple queries required)")
     for nelements in range(min_nelements, max_nelements+1):
         for nsites in range(1, max_nsites, nsites_step+1):
             query = rester.query(

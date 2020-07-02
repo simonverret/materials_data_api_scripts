@@ -7,21 +7,21 @@ HERE = Path(__file__).parent
 MATERIALS_PROJECT_PKL = str(HERE/"materials_project_all.pkl")
 PLOTS_DIR = HERE/"plots"
 
-mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
-print(f"loaded {len(mpdf)} materials")
+mp_df = pd.read_pickle(MATERIALS_PROJECT_PKL)
+print(f"loaded {len(mp_df)} materials")
 
 
 #%% ISOLATING THE MOST STABLE COMPOUNDS
 print()
-stable = mpdf.loc[mpdf['e_above_hull'] <= 0]
+stable = mp_df.loc[mp_df['e_above_hull'] <= 0]
 print(f"{len(stable)} are strictly stable (e_above_hull <= 0)")
-stable05 = mpdf.loc[mpdf['e_above_hull'] <= 0.1]
+stable05 = mp_df.loc[mp_df['e_above_hull'] <= 0.1]
 print(f"{len(stable05)} are weakly stable (e_above_hull <= 0.05; arbitrary criteria)")
 
 
 #%% COUNTING HOW MANY COMPOUNDS WITH THE SAME FORMULA
 print()
-print(f"{len(mpdf.groupby('pretty_formula').size())} unique formulas in total")
+print(f"{len(mp_df.groupby('pretty_formula').size())} unique formulas in total")
 print(f"{len(stable.groupby('pretty_formula').size())}/{len(stable)} unique formulas for strictly stable ")
 print(f"{len(stable05.groupby('pretty_formula').size())}/{len(stable05)} unique formulas for weakly stable")
 
@@ -35,7 +35,7 @@ print(stable_counts.loc[lambda s: s>1])
 
 #%% AMONG THEM EXPLORE F2
 print()
-F2df = mpdf.loc[mpdf["pretty_formula"] == "F2"]
+F2df = mp_df.loc[mp_df["pretty_formula"] == "F2"]
 print("nsites of the 5 F2")
 for nsites in F2df['nsites']:
     print(nsites)
@@ -46,40 +46,40 @@ for cif in F2df['cif']:
 
 #%% HOW MANY FORMULAS NOT IN THE STABLE SUBSET ONES?
 print()
-unstable_only = mpdf[ ~mpdf['pretty_formula'].isin(stable['pretty_formula']) ]
+unstable_only = mp_df[ ~mp_df['pretty_formula'].isin(stable['pretty_formula']) ]
 unstable_counts = unstable_only.groupby('pretty_formula').size()
 print(f"{len(unstable_only)} strictly unstable materials (e_above_hull > 0)")
 print(f"{len(unstable_counts)}/{len(unstable_only)} unique formulas among those")
-print(f"Thus covers {len(unstable_counts)} + {len(stable_counts)} = {len(unstable_counts)+len(stable_counts)}/{len(mpdf)} materials (consistency check)")
+print(f"Thus covers {len(unstable_counts)} + {len(stable_counts)} = {len(unstable_counts)+len(stable_counts)}/{len(mp_df)} materials (consistency check)")
 
 
 #%% WHICH ONES ARE IN ICSD
 print()
-have_icsd = mpdf[mpdf['icsd_ids'].astype(bool)]
+have_icsd = mp_df[mp_df['icsd_ids'].astype(bool)]
 print(f"{len(have_icsd)} entries have ICSD IDs")
-stable_icsd = mpdf[ (mpdf['icsd_ids'].astype(bool)) & (mpdf["e_above_hull"] <= 0)]
+stable_icsd = mp_df[ (mp_df['icsd_ids'].astype(bool)) & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(stable_icsd)} entries have ICSD IDs and are stable")
 
-no_warnings = mpdf[(~mpdf['warnings'].astype(bool)) & (mpdf["e_above_hull"] <= 0)]
+no_warnings = mp_df[(~mp_df['warnings'].astype(bool)) & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(no_warnings)} entries have no warnings and are stable")
 
 
 #%% HOW MANY FERROMAGNETS, FERRIMAGNETS AND PARAMAGNETS?
 print()
-ferromagnets = mpdf.loc[mpdf["ordering"] == "FM"]
-ferrimagnets = mpdf.loc[mpdf["ordering"] == "FiM"]
-paramagnets = mpdf.loc[mpdf["ordering"] == "NM"]
+ferromagnets = mp_df.loc[mp_df["ordering"] == "FM"]
+ferrimagnets = mp_df.loc[mp_df["ordering"] == "FiM"]
+paramagnets = mp_df.loc[mp_df["ordering"] == "NM"]
 print(f"{len(ferromagnets)} ferromagnets")
 print(f"{len(ferrimagnets)} ferrimagnets")
 print(f"{len(paramagnets)} paramagnets")
 
 print()
-stable_ferromagnets = mpdf.loc[(mpdf["ordering"] == "FM") & (mpdf["e_above_hull"] <= 0)]
-stable_ferrimagnets = mpdf.loc[(mpdf["ordering"] == "FiM") & (mpdf["e_above_hull"] <= 0)]
-stable_paramagnets = mpdf.loc[(mpdf["ordering"] == "NM") & (mpdf["e_above_hull"] <= 0)]
-hubbard_stable_ferromagnets = mpdf.loc[mpdf["is_hubbard"] & (mpdf["ordering"] == "FM") & (mpdf["e_above_hull"] <= 0)]
-hubbard_stable_ferrimagnets = mpdf.loc[mpdf["is_hubbard"] & (mpdf["ordering"] == "FiM") & (mpdf["e_above_hull"] <= 0)]
-hubbard_stable_paramagnets = mpdf.loc[mpdf["is_hubbard"] & (mpdf["ordering"] == "NM") & (mpdf["e_above_hull"] <= 0)]
+stable_ferromagnets = mp_df.loc[(mp_df["ordering"] == "FM") & (mp_df["e_above_hull"] <= 0)]
+stable_ferrimagnets = mp_df.loc[(mp_df["ordering"] == "FiM") & (mp_df["e_above_hull"] <= 0)]
+stable_paramagnets = mp_df.loc[(mp_df["ordering"] == "NM") & (mp_df["e_above_hull"] <= 0)]
+hubbard_stable_ferromagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "FM") & (mp_df["e_above_hull"] <= 0)]
+hubbard_stable_ferrimagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "FiM") & (mp_df["e_above_hull"] <= 0)]
+hubbard_stable_paramagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "NM") & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(stable_ferromagnets)} stable ferromagnets, {len(hubbard_stable_ferromagnets)} computed with hubbard U")
 print(f"{len(stable_ferrimagnets)} stable ferrimagnets, {len(hubbard_stable_ferrimagnets)} computed with hubbard U")
 print(f"{len(stable_paramagnets)} stable paramagnets, {len(hubbard_stable_paramagnets)} computed with hubbard U")
@@ -87,14 +87,14 @@ print(f"{len(stable_paramagnets)} stable paramagnets, {len(hubbard_stable_parama
 
 #%% MULTIPLE FILTERS EXAMPLES
 print()
-hubbard_stable     = mpdf.loc[(mpdf["is_hubbard"]==True) & (mpdf["e_above_hull"] <= 0)]
-not_hubbard_stable = mpdf.loc[(mpdf["is_hubbard"]==False) & (mpdf["e_above_hull"] <= 0)]
+hubbard_stable     = mp_df.loc[(mp_df["is_hubbard"]==True) & (mp_df["e_above_hull"] <= 0)]
+not_hubbard_stable = mp_df.loc[(mp_df["is_hubbard"]==False) & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(hubbard_stable)} stable with U")
 print(f"{len(not_hubbard_stable)} stable without U") 
-magnetic = mpdf.loc[(mpdf["ordering"] == "FM") | (mpdf["ordering"] == "FiM")]
-mag_stable             = magnetic.loc[mpdf["e_above_hull"] <= 0]
-mag_hubbard_stable     = magnetic.loc[(mpdf["is_hubbard"]==True) & (mpdf["e_above_hull"] <= 0)]
-mag_not_hubbard_stable = magnetic.loc[(mpdf["is_hubbard"]==False) & (mpdf["e_above_hull"] <= 0)]
+magnetic = mp_df.loc[(mp_df["ordering"] == "FM") | (mp_df["ordering"] == "FiM")]
+mag_stable             = magnetic.loc[mp_df["e_above_hull"] <= 0]
+mag_hubbard_stable     = magnetic.loc[(mp_df["is_hubbard"]==True) & (mp_df["e_above_hull"] <= 0)]
+mag_not_hubbard_stable = magnetic.loc[(mp_df["is_hubbard"]==False) & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(magnetic)} magnetic") 
 print(f"{len(mag_stable)} magnetic stable") 
 print(f"{len(mag_hubbard_stable)} magnetic stable with U") 
@@ -106,7 +106,7 @@ bins = 200
 prop = 'formation_energy_per_atom'
 plt.suptitle(prop)
 # plt.yscale('log')
-plt.hist(mpdf[prop], bins=2*bins, fc=(0, 0, 0, 0.7), label='all')
+plt.hist(mp_df[prop], bins=2*bins, fc=(0, 0, 0, 0.7), label='all')
 plt.hist(stable[prop], bins=bins, fc=(0.9, 0.8, 0, 0.8), label='stable (ab. hull <= 0)')
 plt.hist(not_hubbard_stable[prop], bins=bins, fc=(0, 0.8, 0, 0.7), label='stable no U')
 plt.hist(mag_stable[prop], bins=bins, fc=(1, 0, 0, 0.8), label='magnetic stable')
@@ -129,7 +129,7 @@ list_of_elements = [
 ]
 
 list_of_counts = [
-    mag_stable.elements[mpdf.elements.apply(lambda lst: el in lst)].count()
+    mag_stable.elements[mp_df.elements.apply(lambda lst: el in lst)].count()
     for el in list_of_elements
 ]
 
@@ -141,7 +141,7 @@ plt.savefig(PLOTS_DIR/'element_bar.png')
 
 #%% CIF ACCESS EXAMPLE:
 
-cif_list = mpdf["cif"][0].split()
+cif_list = mp_df["cif"][0].split()
 print(f"cell parameter a: {cif_list[cif_list.index('_cell_length_a')+1]}")
 print(f"cell parameter b: {cif_list[cif_list.index('_cell_length_b')+1]}")
 print(f"cell parameter c: {cif_list[cif_list.index('_cell_length_c')+1]}")
