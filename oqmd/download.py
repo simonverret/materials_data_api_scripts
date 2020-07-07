@@ -12,12 +12,15 @@ OQMD_PKL = str(HERE / "oqmd.pkl")
 
 
 class OQMD_multi_session:
-    def __init__(self, limit=500, cap=637644, max_connections=8):
-        self.address = "http://oqmd.org/optimade/structures?"  # for optimade API
-        # self.address = "http://oqmd.org/oqmdapi/entry?"  # for official oqmd API (slower and max 100 items)
-        # self.session = requests.Session()  ## turns out that parallel connections require parrallel sessions
+    def __init__(self, limit=500, cap=637644, max_connections=8, use_optimade=True):
+        if use_optimade:
+            self.address = "http://oqmd.org/optimade/structures?"  # for optimade API
+        else:
+            self.address = "http://oqmd.org/oqmdapi/entry?"  # for official oqmd API (slower, max 100 items, and names are different
+            if limit>100:
+                limit = 100
 
-        self.limit = limit  # tested above 100 without speed gain
+        self.limit = limit  # tested above 500 without speed gain
         self.cap = cap
         self.n_urls = cap // limit   # total in OQMD // limit
         if cap%limit != 0:
