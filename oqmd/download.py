@@ -5,6 +5,7 @@ from pathlib import Path
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
+import asyncio
 
 
 HERE = Path(__file__).parent
@@ -27,16 +28,9 @@ class OQMD_multi_session:
             self.n_urls += 1
         self.max_connections = max_connections  # tested above 8 without speed gain
 
-    def url_from_dict(self, d):
-        ''' produces string "ke1=val1&key2=val2&..." from dict {'key1':"val1",...}'''
-        url = self.address
-        url += "&".join([f"{key}={d[key]}" for key in d])
-        return url
-
-    def get_urls(self, query_dict, n_queries=1):
-        chunk_size = int(query_dict['limit'])
-        url = self.url_from_dict(query_dict)
-        return [url + f"&offset={chunk_size*i}" for i in range(n_queries)]
+    def get_urls(self):
+        url = self.address + f"&natom=<100&limit={self.limit}"
+        return [url + f"&offset={self.limit*i}" for i in range(self.n_urls)]
 
     def single_query(self, url):
         return requests.get(url, params=None, verify=True)
@@ -48,32 +42,70 @@ class OQMD_multi_session:
             future_to_url = {executor.submit(self.single_query, url): url for url in urls}
             for future in as_completed(future_to_url):
                 url = future_to_url[future]
-                try:
-                    yield future.result()
-                except Exception as exc:
-                    print(f"{url} generated an exception: {exc}")
-
+                try: yield future.result()  # response
+                except Exception as exc: print(f"{url} caused exception: {exc}")
 
     def download_all(self):
-        urls=self.get_urls({'natom':"<100",'limit':str(self.limit)}, self.n_urls)
-
+        urls=self.get_urls()
         print(f"downloading {self.cap} materials from OQMD")
         print(f"{len(urls)} queries of {self.limit} entries each:")
         print(f"  {urls[0]}\n  {urls[1]}\n  {urls[2]}\n  ...and so on")
         start = time.time()
-        
+
         response_list = [] 
         for i, response in enumerate(self.parrallel_queries(urls)):
             response_list.extend(json.loads(response.text)['data'])
             print(f"completed request {i+1}/{len(urls)} in {time.time()-start:.2f} s", end="\r")
         print("done.")
+        
         return response_list
 
+def fetch(session, url):
+    with session.get(url, params=None, verify=True) as response:
+        if response.status_code != 200:
+            print(f"url {url} response: {response.status_code}")
+            # raise ConnectionError(f"url {url} response: {response.status_code}")
+        fetch.counter += 1
+        print(f"completed {fetch.counter} in {time.time()-fetch.start:.2f} s", end="\r")
+        return response
+fetch.counter = 0
+fetch.start = time.time()
+
+async def get_data_asynchronous(urls, max_connections=8):
+    with ThreadPoolExecutor(max_workers=max_connections) as executor:
+        with requests.Session() as session:
+            loop = asyncio.get_event_loop()
+            tasks = [
+                loop.run_in_executor(executor, fetch, *(session, url)) # Allows us to pass in multiple arguments to `fetch`
+                for url in urls
+            ]
+
+            response_list = [] 
+            for response in await asyncio.gather(*tasks):
+                response_list.extend(json.loads(response.text)['data'])
+
+            return response_list
 
 def main():
-    oqmd = OQMD_multi_session()
-    oqdm_list_of_dict = oqmd.download_all()
-    oqmd_df = pd.DataFrame(oqdm_list_of_dict)
+    asynchronous = False
+    
+    main_start = time.time()
+    if asynchronous:
+        oqmd = OQMD_multi_session(limit=100, cap=4000, max_connections=20)
+        urls = oqmd.get_urls()
+        maxc = oqmd.max_connections
+        loop = asyncio.get_event_loop()
+        future = asyncio.ensure_future(get_data_asynchronous(urls, maxc))
+        loop.run_until_complete(future)
+        oqmd_list_of_dict = future.result()
+    else:
+        oqmd = OQMD_multi_session(limit=100, cap=4000, max_connections=20)
+        oqmd_list_of_dict = oqmd.download_all()
+    main_end = time.time()
+
+    print(f"total time {main_end-main_start}")
+
+    oqmd_df = pd.DataFrame(oqmd_list_of_dict)
     oqmd_df.to_pickle(OQMD_PKL)
 
 
