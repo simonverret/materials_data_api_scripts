@@ -13,7 +13,7 @@ OQMD_PKL = str(HERE / "oqmd.pkl")
 
 
 class OQMD_multi_session:
-    def __init__(self, limit=500, cap=637644, max_connections=8, use_optimade=True):
+    def __init__(self, limit=100, cap=637644, max_connections=8, use_optimade=True):
         if use_optimade:
             self.address = "http://oqmd.org/optimade/structures?"  # for optimade API
         else:
@@ -21,7 +21,7 @@ class OQMD_multi_session:
             if limit>100:
                 limit = 100
 
-        self.limit = limit  # tested above 500 without speed gain
+        self.limit = limit  # tested above 100 without speed gain
         self.cap = cap
         self.n_urls = cap // limit   # total in OQMD // limit
         if cap%limit != 0:
@@ -30,7 +30,12 @@ class OQMD_multi_session:
 
     def get_urls(self):
         url = self.address + f"&natom=<100&limit={self.limit}"
-        return [url + f"&offset={self.limit*i}" for i in range(self.n_urls)]
+        urls = [url + f"&offset={self.limit*i}" for i in range(self.n_urls)]
+        print(f"downloading {self.cap} materials from OQMD")
+        print(f"{len(urls)} queries of {self.limit} entries each:")
+        print(f"  {urls[0]}\n  {urls[1]}\n  {urls[2]}\n  ...and so on")
+        return urls
+
 
     def single_query(self, url):
         return requests.get(url, params=None, verify=True)
@@ -47,9 +52,6 @@ class OQMD_multi_session:
 
     def download_all(self):
         urls=self.get_urls()
-        print(f"downloading {self.cap} materials from OQMD")
-        print(f"{len(urls)} queries of {self.limit} entries each:")
-        print(f"  {urls[0]}\n  {urls[1]}\n  {urls[2]}\n  ...and so on")
         start = time.time()
 
         response_list = [] 
@@ -61,7 +63,7 @@ class OQMD_multi_session:
         return response_list
 
 def fetch(session, url):
-    with session.get(url, params=None, verify=True) as response:
+    with session.get(url, params=None, verify=True, timeout=100) as response:
         if response.status_code != 200:
             print(f"url {url} response: {response.status_code}")
             # raise ConnectionError(f"url {url} response: {response.status_code}")
@@ -87,11 +89,10 @@ async def get_data_asynchronous(urls, max_connections=8):
             return response_list
 
 def main():
-    asynchronous = False
-    
+    asynchronous = True
     main_start = time.time()
+    oqmd = OQMD_multi_session()
     if asynchronous:
-        oqmd = OQMD_multi_session(limit=100, cap=4000, max_connections=20)
         urls = oqmd.get_urls()
         maxc = oqmd.max_connections
         loop = asyncio.get_event_loop()
@@ -99,7 +100,6 @@ def main():
         loop.run_until_complete(future)
         oqmd_list_of_dict = future.result()
     else:
-        oqmd = OQMD_multi_session(limit=100, cap=4000, max_connections=20)
         oqmd_list_of_dict = oqmd.download_all()
     main_end = time.time()
 
