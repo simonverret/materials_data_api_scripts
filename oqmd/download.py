@@ -12,7 +12,7 @@ OQMD_PKL = str(HERE / "oqmd.pkl")
 
 
 class OQMD_multi_session:
-    def __init__(self, limit=100, cap=637644, max_connections=8):
+    def __init__(self, limit=500, cap=637644, max_connections=8):
         self.address = "http://oqmd.org/optimade/structures?"  # for optimade API
         # self.address = "http://oqmd.org/oqmdapi/entry?"  # for official oqmd API (slower and max 100 items)
         # self.session = requests.Session()  ## turns out that parallel connections require parrallel sessions
@@ -42,9 +42,14 @@ class OQMD_multi_session:
         n_workers = min(self.max_connections, len(urls))
         print(f"using {n_workers} workers")
         with ThreadPoolExecutor(max_workers=n_workers) as executor:
-            future_to_url = (executor.submit(self.single_query, url) for url in urls)
+            future_to_url = {executor.submit(self.single_query, url): url for url in urls}
             for future in as_completed(future_to_url):
-                yield future.result()
+                url = future_to_url[future]
+                try:
+                    yield future.result()
+                except Exception as exc:
+                    print(f"{url} generated an exception: {exc}")
+
 
     def download_all(self):
         urls=self.get_urls({'natom':"<100",'limit':str(self.limit)}, self.n_urls)
