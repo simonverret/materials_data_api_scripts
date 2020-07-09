@@ -98,6 +98,7 @@ fetch.start = time.time()
 
 async def get_data_asynchronous(urls, max_connections=8):
     print(f"using {max_connections} workers")
+    fetch.counter = 0
     with ThreadPoolExecutor(max_workers=max_connections) as executor:
         with requests.Session() as session:
             loop = asyncio.get_event_loop()
@@ -120,7 +121,7 @@ def main():
     
     start = 8800
     stop = 637644
-    per_parts = 800
+    per_parts = 400  # the 8 queries required by a 800 per_parts often failed
     num_parts = (stop-start)//per_parts
     if per_parts%num_parts != 0:
         num_parts += 1
