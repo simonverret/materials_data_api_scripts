@@ -119,7 +119,7 @@ async def get_data_asynchronous(urls, max_connections=8):
 def main():
     asynchronous = True
     
-    start = 8800
+    start = 0
     stop = 637644
     per_parts = 400  # the 8 queries required by a 800 per_parts often failed
     num_parts = (stop-start)//per_parts
@@ -179,56 +179,33 @@ if __name__ == "__main__":
 
 
 
+#%%  EXAMPLES OF THE RESPONSES OBJECT
 
-
-
-
-
-
-
-
-
-
-
-#%%
-
-# json.loads(response.text)['data']
-
-# # query_dict = {
-# #     "natom": "<100",
-# #     "limit": "500"
-# # }
-
-# # with OQMD_multi_session() as oqmd:
-# #     responses = oqmd.parallel_queries(query_dict, 16)
-
-# # all_data = []
-# # for response in responses:
-# #     data = json.loads(response.text)
-# #     all_data.extend(data["data"])
-# # print(f"number of materials: {len(all_data)}")
+# query_dict = {
+#     "natom": "<100",
+#     "limit": "500"
+# }
+# with OQMD_multi_session() as oqmd:
+#     responses = oqmd.parallel_queries(query_dict, 16)
+# all_data = []
+# for response in responses:
+#     data = json.loads(response.text)
+#     all_data.extend(data["data"])
+# print(f"number of materials: {len(all_data)}")
 
 # #%%
-# # responses[0].__dict__
+# responses[0].__dict__
 # list_of_dict = json.loads(responses[0].text)['data']  #list of dict of entries
 # dataframe = pd.DataFrame(list_of_dict)
 # dataframe['chemical_formula']
 
-# # all_data[0]['chemical_formula']
-
 # #%% WHAT THE DATA CONTAINS
 # data = json.loads(responses[0].text)
-
 # print(data["links"])
-# print()
 # print(data["resource"])
-# print()
 # print(data["meta"])
-# print()
 # print(data["response_message"])
-# print()
 # print(data["data"][0].keys())
-
 # print(f"next page : {data['links']['next']}")
 # print(f"number of materials: {len(data['data'])}")
 # # print(data['resource'])  # this one is empty

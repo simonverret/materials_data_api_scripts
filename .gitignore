@@ -6,5 +6,7 @@
 icsd/icsd*.csv
 icsd/icsd*.zip
 icsd/icsd_credentials.json
+oqmd/oqmd*.csv
+oqmd/oqmd*.zip
 mp/api_key.json
 env
