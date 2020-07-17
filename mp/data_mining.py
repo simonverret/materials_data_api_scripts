@@ -4,7 +4,7 @@ from pathlib import Path  ## for os-agnostic paths
 import matplotlib.pyplot as plt  ## standard python plotting tool
 
 HERE = Path(__file__).parent
-MATERIALS_PROJECT_PKL = str(HERE/"materials_project_all.pkl")
+MATERIALS_PROJECT_PKL = str(HERE/"materials_project.pkl")
 PLOTS_DIR = HERE/"plots"
 
 mp_df = pd.read_pickle(MATERIALS_PROJECT_PKL)
@@ -31,6 +31,12 @@ print()
 print("the duplicates are")
 stable_counts = stable.groupby('pretty_formula').size()
 print(stable_counts.loc[lambda s: s>1])
+
+
+#%% AMONG THEM EXPLORE SIO2
+print()
+SiO2df = mp_df.loc[mp_df["pretty_formula"] == "SiO2"]
+print(f"{len(SiO2df)} instances of SiO2")
 
 
 #%% AMONG THEM EXPLORE F2
@@ -69,20 +75,30 @@ print()
 ferromagnets = mp_df.loc[mp_df["ordering"] == "FM"]
 ferrimagnets = mp_df.loc[mp_df["ordering"] == "FiM"]
 paramagnets = mp_df.loc[mp_df["ordering"] == "NM"]
+afm = mp_df.loc[mp_df["ordering"] == "AFM"]
 print(f"{len(ferromagnets)} ferromagnets")
 print(f"{len(ferrimagnets)} ferrimagnets")
 print(f"{len(paramagnets)} paramagnets")
+print(f"{len(afm)} afm")
 
 print()
 stable_ferromagnets = mp_df.loc[(mp_df["ordering"] == "FM") & (mp_df["e_above_hull"] <= 0)]
 stable_ferrimagnets = mp_df.loc[(mp_df["ordering"] == "FiM") & (mp_df["e_above_hull"] <= 0)]
 stable_paramagnets = mp_df.loc[(mp_df["ordering"] == "NM") & (mp_df["e_above_hull"] <= 0)]
+stable_afm = mp_df.loc[(mp_df["ordering"] == "AFM") & (mp_df["e_above_hull"] <= 0)]
 hubbard_stable_ferromagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "FM") & (mp_df["e_above_hull"] <= 0)]
 hubbard_stable_ferrimagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "FiM") & (mp_df["e_above_hull"] <= 0)]
 hubbard_stable_paramagnets = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "NM") & (mp_df["e_above_hull"] <= 0)]
+hubbard_stable_afm = mp_df.loc[mp_df["is_hubbard"] & (mp_df["ordering"] == "AFM") & (mp_df["e_above_hull"] <= 0)]
 print(f"{len(stable_ferromagnets)} stable ferromagnets, {len(hubbard_stable_ferromagnets)} computed with hubbard U")
 print(f"{len(stable_ferrimagnets)} stable ferrimagnets, {len(hubbard_stable_ferrimagnets)} computed with hubbard U")
 print(f"{len(stable_paramagnets)} stable paramagnets, {len(hubbard_stable_paramagnets)} computed with hubbard U")
+print(f"{len(stable_afm)} stable antiferromagnets, {len(hubbard_stable_afm)} computed with hubbard U")
+
+
+#%%
+print("example of an afm magmoms:")
+mp_df['magmoms'].iloc[125959]
 
 
 #%% MULTIPLE FILTERS EXAMPLES
