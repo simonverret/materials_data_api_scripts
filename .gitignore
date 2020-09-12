@@ -9,5 +9,7 @@ icsd/icsd_credentials.json
 oqmd/oqmd*.csv
 oqmd/oqmd*.zip
 mp/mp*.zip
+mp/subset_ids.csv
+mp/citrine_MP_ICSD_compounds_PIFs.json
 mp/api_key.json
 env

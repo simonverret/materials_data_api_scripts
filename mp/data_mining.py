@@ -5,10 +5,32 @@ import matplotlib.pyplot as plt  ## standard python plotting tool
 
 HERE = Path(__file__).parent
 MATERIALS_PROJECT_PKL = str(HERE/"materials_project.pkl")
+SUBSET_IDS_CSV = str(HERE/"subset_ids.csv")
+CITRINE_MP_PKL = str(HERE/"citrine_mp.pkl")
 PLOTS_DIR = HERE/"plots"
 
-mp_df = pd.read_pickle(MATERIALS_PROJECT_PKL)
-print(f"loaded {len(mp_df)} materials")
+full_mp_df = pd.read_pickle(MATERIALS_PROJECT_PKL)
+
+
+print("DOWNLOADED:")
+print(f"loaded {len(full_mp_df)} materials")
+
+print("\n\nSUBSET:")
+subset_ids = pd.read_csv(SUBSET_IDS_CSV, names=["material_id"])
+print(len(subset_ids), "material_ids")
+subset_mp_df = full_mp_df[full_mp_df["material_id"].isin(subset_ids["material_id"])]
+print(len(subset_mp_df), "materials selected")
+print(len(subset_mp_df)-len(subset_ids), "missing ids")
+print(len(full_mp_df)-len(subset_mp_df), "missing from downloaded")
+
+print("\navailable columns")
+for name in list(full_mp_df.columns): print(" ",name)
+
+print("\n\nCITRINE:")
+print(f"loaded {len(citrine_mp_df)} materials")
+print("\navailable columns:")
+citrine_mp_df = pd.read_pickle(CITRINE_MP_PKL)
+for name in list(citrine_mp_df.columns): print(" ",name)
 
 
 #%% ISOLATING THE MOST STABLE COMPOUNDS
@@ -38,6 +60,10 @@ print()
 SiO2df = mp_df.loc[mp_df["pretty_formula"] == "SiO2"]
 print(f"{len(SiO2df)} instances of SiO2")
 
+
+#%%
+
+mp_df.loc[mp_df["pretty_formula"] == "SrTiO3"]["formation_energy_per_atom"]
 
 #%% AMONG THEM EXPLORE F2
 print()
@@ -116,6 +142,14 @@ print(f"{len(mag_stable)} magnetic stable")
 print(f"{len(mag_hubbard_stable)} magnetic stable with U") 
 print(f"{len(mag_not_hubbard_stable)} magnetic stable without U") 
 
+#%% SCATTER PLOT
+
+mp_df.plot.scatter(x='e_above_hull', y='nelements')
+plt.show()
+
+
+#%%
+mp_df.columns
 
 #%% PLOTS_DIR ENERGY HUBBARD
 bins = 200
