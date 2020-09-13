@@ -18,31 +18,56 @@ print(f"loaded {len(mpdf)} materials")
 print("\n\nSUBSET:")
 subset_ids = pd.read_csv(SUBSET_IDS_CSV, names=["material_id"])
 print(len(subset_ids), "material_ids")
-subset_mpdf = mpdf[mpdf["material_id"].isin(subset_ids["material_id"])]
-print(len(subset_mpdf), "materials selected")
-print(len(subset_mpdf)-len(subset_ids), "missing ids")
-print(len(mpdf)-len(subset_mpdf), "missing from downloaded")
+subset_df = mpdf[mpdf["material_id"].isin(subset_ids["material_id"])]
+print(len(subset_df), "materials selected")
+print(len(subset_df)-len(subset_ids), "missing ids")
+print(len(mpdf)-len(subset_df), "missing from downloaded")
 
 print("\navailable columns")
 for name in list(mpdf.columns): print(" ",name)
 
 print("\n\nCITRINE:")
-citrine_mpdf = pd.read_pickle(CITRINE_MP_PKL)
-print(f"loaded {len(citrine_mpdf)} materials")
+citrine_df = pd.read_pickle(CITRINE_MP_PKL)
+print(f"loaded {len(citrine_df)} materials")
 print("\navailable columns:")
-for name in list(citrine_mpdf.columns): print(" ",name)
+for name in list(citrine_df.columns): print(" ",name)
 
 
 #%% IS CITRINE VERY DIFFERENT FROM UPDATED DATA ?
-mpdf_in_citrine = mpdf[mpdf["material_id"].isin(citrine_mpdf["material_id"])]
-print(f"{len(mpdf_in_citrine)} updated/{len(citrine_mpdf)} originals, {len(citrine_mpdf)-len(mpdf_in_citrine)} missing") 
+mpdf_in_citrine = mpdf[mpdf["material_id"].isin(citrine_df["material_id"])]
+print(f"{len(mpdf_in_citrine)} updated/{len(citrine_df)} originals, {len(citrine_df)-len(mpdf_in_citrine)} missing") 
+citrine_in_mpdf = citrine_df[citrine_df["material_id"].isin(mpdf_in_citrine["material_id"])]
+citrine_not_in_mpdf = citrine_df[~citrine_df["material_id"].isin(mpdf_in_citrine["material_id"])]
 
-citrine_in_mpdf = 
+print("common columnds")
+for name in list(citrine_in_mpdf.columns):
+    if name in list(mpdf_in_citrine.columns):
+        print(" ",name)
+
+X = citrine_in_mpdf.sort_values("material_id", ignore_index=True)
+Y = mpdf_in_citrine.sort_values("material_id", ignore_index=True)
+X["material_id"]==Y["material_id"]
+
+#%% PLOT OLD vs NEW
+column = "e_above_hull"
+x = X[column].rename(f"updated_{column}")
+y = Y[column].rename(f"citrine_{column}")
+plot_df = pd.concat([x, y], axis=1)
+plot_df.plot.scatter(f"citrine_{column}",f"updated_{column}")
+plt.title(f"{column}\nonly {len(X[X[column]==Y[column]])}/{len(X)} are the same")
+plt.savefig(PLOTS_DIR/f"updated_citrine_{column}")
+
+
 
 
 
 #%% WHAT IS THE SUBSET FROM CITRINE ?
+print(f"IN CITRINE (total {len(citrine_df)}) / IN LAST MP {len(mpdf)}")
+mc = citrine_df
+print(f"{len(mc[mc['icsd_ids'].astype(bool)])}/{len(mpdf[mpdf['icsd_ids'].astype(bool)])} have ICSD ids {len(mc[mc['icsd_ids'].astype(bool)])-len(mpdf[mpdf['icsd_ids'].astype(bool)])} have no more icsd_ids")
 
+
+#%% ICSD? Stable?
 have_icsd = mpdf[mpdf['icsd_ids'].astype(bool)]
 print(f"\n{len(have_icsd)} entries have ICSD IDs")
 stable_icsd = mpdf[ (mpdf['icsd_ids'].astype(bool)) & (mpdf["e_above_hull"] <= 0)]
