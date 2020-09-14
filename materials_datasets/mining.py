@@ -82,14 +82,21 @@ print(f"{len(mpdf[mpdf['icsd_ids'].astype(bool)])}/{len(mpdf)} of current MP hav
 print(f"{len(citrine_df[citrine_df['icsd_ids'].astype(bool)])-len(mpdf[mpdf['icsd_ids'].astype(bool)])} have no ICSD id anymore")
 print(f"Probably has to do with CITRINE being from January 2019")
 
-
-#%% PLOT OLD vs NEW
-for column in ["e_above_hull"]:
-    x = X[column].rename(f"updated_{column}")
-    y = Y[column].rename(f"citrine_{column}")
+for column in [
+    "final_energy",
+    "final_energy_per_atom",
+    "volume",
+    "nsites",
+    "formation_energy_per_atom",
+    "e_above_hull",
+    "band_gap",
+    "total_magnetization",
+]:
+    x = citrine_in_mpdf[column].rename(f"updated_{column}")
+    y = mpdf_in_citrine[column].rename(f"citrine_{column}")
     plot_df = pd.concat([x, y], axis=1)
     plot_df.plot.scatter(f"citrine_{column}",f"updated_{column}")
-    plt.title(f"{column}\nonly {len(X[X[column]==Y[column]])}/{len(X)} are the same")
+    plt.title(f"{column}\nonly {len(citrine_in_mpdf[citrine_in_mpdf[column]==mpdf_in_citrine[column]])}/{len(citrine_in_mpdf)} are the same")
     plt.savefig(PLOTS_DIR/f"updated_citrine_{column}")
 
 
@@ -103,7 +110,7 @@ no_warnings = mpdf[(~mpdf['warnings'].astype(bool)) & (mpdf["e_above_hull"] <= 0
 print(f"{len(no_warnings)} entries have no warnings and are stable")
 
 
-#%% ARE THE STRUCRURES VERY DIFFERENT IN OQMD, ICSD, MP?
+#%% ARE THE STRUCRURES VERmpdf_in_citrine DIFFERENT IN OQMD, ICSD, MP?
 
 
 
