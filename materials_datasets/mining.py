@@ -1,30 +1,54 @@
 #%% IMPORTING THE FULL DATAFRAME
-import pandas as pd  ## provides a fast spreadsheet object (DataFrame)
 from pathlib import Path  ## for os-agnostic paths
+import pandas as pd  ## provides a fast spreadsheet object (DataFrame)
 import matplotlib.pyplot as plt  ## standard python plotting tool
 
 HERE = Path(__file__).parent
-MATERIALS_PROJECT_PKL = str(HERE/"materials_project.pkl")
-SUBSET_IDS_CSV = str(HERE/"subset_ids.csv")
-CITRINE_MP_PKL = str(HERE/"citrine_mp.pkl")
+PARENT = Path(__file__).parent.parent
 PLOTS_DIR = HERE/"plots"
 
+MATERIALS_PROJECT_PKL = str(HERE/"mp"/"materials_project.pkl")
+SUBSET_MPIDS_CSV = str(HERE/"mp"/"subset_ids.csv")
+CITRINE_MP_PKL = str(HERE/"mp"/"citrine_mp.pkl")
+
+ICSD_AUG_PKL = str(HERE/"icsd"/"all_icsd_cifs_augmented.pkl")
+
+OQMD_PKL = str(HERE/"oqmd"/"oqmd.pkl")
+OQMD_CSV = str(HERE/"oqmd"/"oqmd.csv")
+
 mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
+icsdf = pd.read_pickle(ICSD_AUG_PKL)
+oqmdf = pd.read_pickle(OQMD_PKL)
 
 
-print("DOWNLOADED:")
-print(f"loaded {len(mpdf)} materials")
+#%% PRINT BASIC INFO ABOUT THE DATASETS
+for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf}.items():
+    print(f"\nloaded {len(dataset)} materials from {name}")
+    print("available columns")
+    for column in list(dataset.columns): 
+        print(" ",column)
+
+
+#%% ICSD WITH INTEGER FORMULA DOPING ONLY
+def fraction_composition(s):
+    return not ("." in s)
+
+int_sum_icsdf = icsdf.loc[ icsdf['_chemical_formula_sum'].apply(lambda s: not (("." in s) or ("(" in s))) ]
+print(f"{len(int_sum_icsdf)}/{len(icsdf)} materials from OQMD have no '.' in their sum formula")
+int_struct_icsdf = icsdf.loc[ icsdf['_chemical_formula_structural'].apply(lambda s: not (("." in s) or ("(" in s))) ]
+print(f"{len(int_struct_icsdf)}/{len(icsdf)} materials from OQMD have no '.' in their structural formula")
+
+
+#%% SUBSET and CITRINE
+print("CITRINE:")
 
 print("\n\nSUBSET:")
-subset_ids = pd.read_csv(SUBSET_IDS_CSV, names=["material_id"])
+subset_ids = pd.read_csv(SUBSET_MPIDS_CSV, names=["material_id"])
 print(len(subset_ids), "material_ids")
-subset_df = mpdf[mpdf["material_id"].isin(subset_ids["material_id"])]
-print(len(subset_df), "materials selected")
-print(len(subset_df)-len(subset_ids), "missing ids")
-print(len(mpdf)-len(subset_df), "missing from downloaded")
-
-print("\navailable columns")
-for name in list(mpdf.columns): print(" ",name)
+subset_mpdf = mpdf[mpdf["material_id"].isin(subset_ids["material_id"])]
+print(len(subset_mpdf), "materials selected")
+print(len(subset_mpdf)-len(subset_ids), "missing; all subset ids were found")
+print(len(mpdf)-len(subset_mpdf), "missing from subset")
 
 print("\n\nCITRINE:")
 citrine_df = pd.read_pickle(CITRINE_MP_PKL)
@@ -32,39 +56,41 @@ print(f"loaded {len(citrine_df)} materials")
 print("\navailable columns:")
 for name in list(citrine_df.columns): print(" ",name)
 
-
-#%% IS CITRINE VERY DIFFERENT FROM UPDATED DATA ?
 mpdf_in_citrine = mpdf[mpdf["material_id"].isin(citrine_df["material_id"])]
-print(f"{len(mpdf_in_citrine)} updated/{len(citrine_df)} originals, {len(citrine_df)-len(mpdf_in_citrine)} missing") 
+print(f"\n{len(mpdf_in_citrine)} in mpdf/{len(citrine_df)} in citrine, {len(citrine_df)-len(mpdf_in_citrine)} ids of citrine are not in mpdf") 
+
+subset_mpdf_in_citrine = mpdf[mpdf["material_id"].isin(citrine_df["material_id"])]
+print(f"{len(subset_mpdf_in_citrine)} in mpdf/{len(citrine_df)} in citrine, {len(citrine_df)-len(subset_mpdf_in_citrine)} ids of citrine are not in subset") 
+
 citrine_in_mpdf = citrine_df[citrine_df["material_id"].isin(mpdf_in_citrine["material_id"])]
 citrine_not_in_mpdf = citrine_df[~citrine_df["material_id"].isin(mpdf_in_citrine["material_id"])]
 
-print("common columnds")
+print("\ncommon columns")
 for name in list(citrine_in_mpdf.columns):
     if name in list(mpdf_in_citrine.columns):
         print(" ",name)
 
-X = citrine_in_mpdf.sort_values("material_id", ignore_index=True)
-Y = mpdf_in_citrine.sort_values("material_id", ignore_index=True)
-X["material_id"]==Y["material_id"]
+print("\nSorting...")
+citrine_in_mpdf = citrine_in_mpdf.sort_values("material_id", ignore_index=True)
+mpdf_in_citrine = mpdf_in_citrine.sort_values("material_id", ignore_index=True)
+print(f"{all(citrine_in_mpdf['material_id']==mpdf_in_citrine['material_id'])} : all ids are the same")
+print(f"{all(citrine_in_mpdf['pretty_formula']==mpdf_in_citrine['pretty_formula'])} : all pretty_formula are the same")
+
+print("\nICSD ids")
+print(f"{len(citrine_df[citrine_df['icsd_ids'].astype(bool)])}/{len(citrine_df)} of CITRINE have ICSD ids (all of them)")
+print(f"{len(mpdf[mpdf['icsd_ids'].astype(bool)])}/{len(mpdf)} of current MP have ICSD ids")
+print(f"{len(citrine_df[citrine_df['icsd_ids'].astype(bool)])-len(mpdf[mpdf['icsd_ids'].astype(bool)])} have no ICSD id anymore")
+print(f"Probably has to do with CITRINE being from January 2019")
+
 
 #%% PLOT OLD vs NEW
-column = "e_above_hull"
-x = X[column].rename(f"updated_{column}")
-y = Y[column].rename(f"citrine_{column}")
-plot_df = pd.concat([x, y], axis=1)
-plot_df.plot.scatter(f"citrine_{column}",f"updated_{column}")
-plt.title(f"{column}\nonly {len(X[X[column]==Y[column]])}/{len(X)} are the same")
-plt.savefig(PLOTS_DIR/f"updated_citrine_{column}")
-
-
-
-
-
-#%% WHAT IS THE SUBSET FROM CITRINE ?
-print(f"IN CITRINE (total {len(citrine_df)}) / IN LAST MP {len(mpdf)}")
-mc = citrine_df
-print(f"{len(mc[mc['icsd_ids'].astype(bool)])}/{len(mpdf[mpdf['icsd_ids'].astype(bool)])} have ICSD ids {len(mc[mc['icsd_ids'].astype(bool)])-len(mpdf[mpdf['icsd_ids'].astype(bool)])} have no more icsd_ids")
+for column in ["e_above_hull"]:
+    x = X[column].rename(f"updated_{column}")
+    y = Y[column].rename(f"citrine_{column}")
+    plot_df = pd.concat([x, y], axis=1)
+    plot_df.plot.scatter(f"citrine_{column}",f"updated_{column}")
+    plt.title(f"{column}\nonly {len(X[X[column]==Y[column]])}/{len(X)} are the same")
+    plt.savefig(PLOTS_DIR/f"updated_citrine_{column}")
 
 
 #%% ICSD? Stable?
@@ -77,9 +103,6 @@ no_warnings = mpdf[(~mpdf['warnings'].astype(bool)) & (mpdf["e_above_hull"] <= 0
 print(f"{len(no_warnings)} entries have no warnings and are stable")
 
 
-
-
-
 #%% ARE THE STRUCRURES VERY DIFFERENT IN OQMD, ICSD, MP?
 
 
@@ -87,20 +110,24 @@ print(f"{len(no_warnings)} entries have no warnings and are stable")
 
 
 
+#%% ################ 
+# ADVANCED MINING
+####################
 
 
 
 
+#%% ISCD CIF CONTAINS SUBSTRING with CIF example
+substr = "abin"
+icsdf_with_substr = icsdf['cif'].loc[ icsdf['cif'].apply(lambda cif: substr in cif) ]
+print(f"{len(icsdf_with_substr)} contains the string '{substr}'")
+print("\nexample:\n")
+print(icsdf_with_substr.iloc[0])
+print("\nsubstr in lines:", [line for line in icsdf_with_substr.iloc[0].split('\n') if substr in line])
 
 
 
-
-
-
-
-
-
-#%% ISOLATING THE MOST STABLE COMPOUNDS
+# ISOLATING THE MOST STABLE COMPOUNDS
 print()
 stable = mpdf.loc[mpdf['e_above_hull'] <= 0]
 print(f"{len(stable)} are strictly stable (e_above_hull <= 0)")
