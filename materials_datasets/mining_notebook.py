@@ -20,13 +20,89 @@ mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
 icsdf = pd.read_pickle(ICSD_AUG_PKL)
 oqmdf = pd.read_pickle(OQMD_PKL)
 
+icsdf = icsdf.set_index(icsdf['_database_code_ICSD'].astype(int))  ## rows are now indexed by icsd_id
+mpdf = mpdf.set_index(mpdf['material_id'])  ## rows are now indexed by material_id
+
+
+#%% MERGE THE MP and ICSD DATAFRAME (didn't find a pandas way to do it)
+combined_rows = []
+used_icsd_ids = []
+wrong_icsd_ids = []
+mp_rows = mpdf.to_dict('records')
+for mp_row in mp_rows:
+    if mp_row['icsd_ids']:
+        for icsd_id in mp_row['icsd_ids']:
+            try: ## sometimes the icsd_id doesn't exist
+                icsd_row = icsdf.loc[icsd_id].to_dict()
+                used_icsd_ids.append(icsd_id)
+            except KeyError as e:
+                wrong_icsd_ids.append(e)
+                continue
+            tmp_dict = {}
+            for k,v in mp_row.items():
+                tmp_dict['mp_'+k] = v
+            for k,v in icsd_row.items():
+                tmp_dict['icsd_'+k] = v
+            combined_rows.append(tmp_dict)
+    else:
+        tmp_dict = {}
+        for k,v in mp_row.items():
+            tmp_dict['mp_'+k] = v
+        combined_rows.append(tmp_dict)
+
+remaining_icsd_rows = icsdf.loc[~icsdf.index.isin(used_icsd_ids)].to_dict('records')
+for icsd_row in remaining_icsd_rows:
+    tmp_dict = {}
+    for k,v in icsd_row.items():
+        tmp_dict['icsd_'+k] = v
+    combined_rows.append(tmp_dict)
+
+super_df = pd.DataFrame(combined_rows)
+
 
 #%% PRINT BASIC INFO ABOUT THE DATASETS
-for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf}.items():
+for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf, 'super':super_df}.items():
     print(f"\nloaded {len(dataset)} materials from {name}")
     print("available columns")
     for column in list(dataset.columns): 
         print(" ",column)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+icsd_mask = ~super_df['icsd__database_code_ICSD'].isna()
+mp_mask = ~super_df['mp_material_id'].isna()
+grouped_icsd = super_df.loc[icsd_mask & mp_mask].groupby('icsd__database_code_ICSD')
+grouped_mp = super_df.loc[icsd_mask & mp_mask].groupby('mp_material_id')
+
+#%%
+print(f"{len(wrong_icsd_ids)} bad icsd_ids in the icsd_ids list in MP")
+print(f"{len(grouped_mp)} materials from MP map to ICSD entries")
+print(f"with maximum {grouped_mp['mp_material_id'].agg('count').max()} ICSD entries for one MP entry")
+print(f"{len(grouped_icsd)} materials from ICSD map to MP entries")
+print(f"with maximum {grouped_icsd['mp_material_id'].agg('count').max()} MP entries for one ICSD entry")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #%% ICSD WITH INTEGER FORMULA DOPING ONLY
@@ -102,18 +178,30 @@ for column in [
 
 #%% ICSD? Stable?
 have_icsd = mpdf[mpdf['icsd_ids'].astype(bool)]
-print(f"\n{len(have_icsd)} entries have ICSD IDs")
-stable_icsd = mpdf[ (mpdf['icsd_ids'].astype(bool)) & (mpdf["e_above_hull"] <= 0)]
-print(f"{len(stable_icsd)} entries have ICSD IDs and are stable")
-
-no_warnings = mpdf[(~mpdf['warnings'].astype(bool)) & (mpdf["e_above_hull"] <= 0)]
-print(f"{len(no_warnings)} entries have no warnings and are stable")
-
-
-#%% ARE THE STRUCRURES VERmpdf_in_citrine DIFFERENT IN OQMD, ICSD, MP?
+print(f"\n{len(have_icsd)} entries have ICSD ids")
+stable = mpdf[mpdf["e_above_hull"] <= 0]
+print(f"{len(stable)} entries are stable")
+warnings = mpdf[mpdf['warnings'].astype(bool)]
+print(f"{len(warnings)} entries have warnings")
+stable_icsd = mpdf[ (mpdf['icsd_ids'].astype(bool)) & (mpdf["e_above_hull"] <= 0) & (~mpdf['warnings'].astype(bool))]
+print(f"{len(stable_icsd)} entries have ICSD ids, are stable, and have no warnings")
 
 
 
+#%% ARE THE STRUCRURES VERY DIFFERENT IN OQMD, ICSD, MP?
+
+have_many_icsd = have_icsd[have_icsd['icsd_ids'].apply(lambda l: len(l)>1)]
+print(f"{len(have_many_icsd)}/{len(have_icsd)} have many ICSD ids")
+ii = 2024
+print(f"example {ii}: {have_many_icsd['pretty_formula'].iloc[ii]}")
+print(have_many_icsd['cif'].iloc[ii])
+for icsd_id in have_many_icsd['icsd_ids'].iloc[ii]:
+    print("\n",icsd_id)
+    print(icsdf['_chemical_formula_sum'].loc[icsdf['_database_code_ICSD']==str(icsd_id)])
+    try:
+        print(icsdf['cif'].loc[icsdf['_database_code_ICSD']==str(icsd_id)].iloc[0])
+    except :
+        pass
 
 
 
@@ -121,11 +209,8 @@ print(f"{len(no_warnings)} entries have no warnings and are stable")
 # ADVANCED MINING
 ####################
 
-
-
-
 #%% ISCD CIF CONTAINS SUBSTRING with CIF example
-substr = "abin"
+substr = "ferromagneti"
 icsdf_with_substr = icsdf['cif'].loc[ icsdf['cif'].apply(lambda cif: substr in cif) ]
 print(f"{len(icsdf_with_substr)} contains the string '{substr}'")
 print("\nexample:\n")
@@ -134,7 +219,7 @@ print("\nsubstr in lines:", [line for line in icsdf_with_substr.iloc[0].split('\
 
 
 
-# ISOLATING THE MOST STABLE COMPOUNDS
+#%% ISOLATING THE MOST STABLE COMPOUNDS
 print()
 stable = mpdf.loc[mpdf['e_above_hull'] <= 0]
 print(f"{len(stable)} are strictly stable (e_above_hull <= 0)")
@@ -277,11 +362,3 @@ plt.bar(list_of_elements, list_of_counts)
 plt.xlim([-0.5,len(list_of_elements)-0.5])
 plt.tight_layout()
 plt.savefig(PLOTS_DIR/'element_bar.png')
-
-#%% CIF ACCESS EXAMPLE:
-
-cif_list = mpdf["cif"][0].split()
-print(f"cell parameter a: {cif_list[cif_list.index('_cell_length_a')+1]}")
-print(f"cell parameter b: {cif_list[cif_list.index('_cell_length_b')+1]}")
-print(f"cell parameter c: {cif_list[cif_list.index('_cell_length_c')+1]}")
-
