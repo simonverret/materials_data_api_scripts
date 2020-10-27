@@ -20,6 +20,7 @@ mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
 icsdf = pd.read_pickle(ICSD_AUG_PKL)
 oqmdf = pd.read_pickle(OQMD_PKL)
 
+#%%
 icsdf = icsdf.set_index(icsdf['_database_code_ICSD'].astype(int))  ## rows are now indexed by icsd_id
 mpdf = mpdf.set_index(mpdf['material_id'])  ## rows are now indexed by material_id
 
@@ -60,6 +61,60 @@ for icsd_row in remaining_icsd_rows:
 super_df = pd.DataFrame(combined_rows)
 
 
+#%% USING UMAP
+import seaborn as sns
+
+umap_mpdf = mpdf[[
+    "band_gap",
+    "density",
+    "e_above_hull",
+    # "efermi",
+    # "encut",
+    # "energy",
+    "energy_per_atom",
+    # "final_energy",
+    # "final_energy_per_atom",
+    "formation_energy_per_atom",
+    # "nkpts",
+    # "nsites",
+    "total_magnetization",
+    "volume",
+    # "exchange_symmetry",
+    # "num_unique_magnetic_sites",
+    # "total_magnetization_normalized_vol",
+    # "total_magnetization_normalized_formula_units",
+    # "num_magnetic_sites",
+    # "true_total_magnetization",
+]].dropna()
+
+# sns.pairplot(umap_mpdf, hue='total_magnetization')
+
+ ## %% UMAP
+from sklearn.preprocessing import StandardScaler
+import umap
+import matplotlib.pyplot as plt
+reducer = umap.UMAP()
+umap_data = umap_mpdf[[
+    "band_gap",
+    "density",
+    "e_above_hull",
+    "energy_per_atom",
+    # "total_magnetization",
+    "volume",
+]].values
+scaled_data = StandardScaler().fit_transform(umap_data)
+embedding = reducer.fit_transform(scaled_data)
+embedding.shape
+
+plt.scatter(
+    embedding[:, 0],
+    embedding[:, 1],
+    s=0.8,
+    c=umap_mpdf.total_magnetization
+)
+plt.gca().set_aspect('equal', 'datalim')
+plt.title('UMAP projection', fontsize=24)
+
 #%% PRINT BASIC INFO ABOUT THE DATASETS
 for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf, 'super':super_df}.items():
     print(f"\nloaded {len(dataset)} materials from {name}")
@@ -68,22 +123,15 @@ for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf, 'super':super_df}.i
         print(" ",column)
 
 
-
-
-
-
-
-
-
-
-
-
-
 #%%
 icsd_mask = ~super_df['icsd__database_code_ICSD'].isna()
 mp_mask = ~super_df['mp_material_id'].isna()
 grouped_icsd = super_df.loc[icsd_mask & mp_mask].groupby('icsd__database_code_ICSD')
 grouped_mp = super_df.loc[icsd_mask & mp_mask].groupby('mp_material_id')
+
+
+#%% HOW MANY ICSD HAVE 4 MP ASSOCIATED
+
 
 #%%
 print(f"{len(wrong_icsd_ids)} bad icsd_ids in the icsd_ids list in MP")
@@ -91,18 +139,6 @@ print(f"{len(grouped_mp)} materials from MP map to ICSD entries")
 print(f"with maximum {grouped_mp['mp_material_id'].agg('count').max()} ICSD entries for one MP entry")
 print(f"{len(grouped_icsd)} materials from ICSD map to MP entries")
 print(f"with maximum {grouped_icsd['mp_material_id'].agg('count').max()} MP entries for one ICSD entry")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #%% ICSD WITH INTEGER FORMULA DOPING ONLY
