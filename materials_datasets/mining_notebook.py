@@ -16,25 +16,28 @@ ICSD_AUG_PKL = str(HERE/"icsd"/"all_icsd_cifs_augmented.pkl")
 OQMD_PKL = str(HERE/"oqmd"/"oqmd.pkl")
 OQMD_CSV = str(HERE/"oqmd"/"oqmd.csv")
 
+PTBL_PKL = str(HERE/"ptable"/"ptable.pkl")
+
 mpdf = pd.read_pickle(MATERIALS_PROJECT_PKL)
 icsdf = pd.read_pickle(ICSD_AUG_PKL)
 oqmdf = pd.read_pickle(OQMD_PKL)
+ptable = pd.read_pickle(PTBL_PKL)
 
-#%%
-icsdf = icsdf.set_index(icsdf['_database_code_ICSD'].astype(int))  ## rows are now indexed by icsd_id
-mpdf = mpdf.set_index(mpdf['material_id'])  ## rows are now indexed by material_id
 
 
 #%% MERGE THE MP and ICSD DATAFRAME (didn't find a pandas way to do it)
+icsdf_idx = icsdf.set_index(icsdf['_database_code_ICSD'].astype(int))  ## rows are now indexed by icsd_id
+mpdf_idx = mpdf.set_index(mpdf['material_id'])  ## rows are now indexed by material_id
+
 combined_rows = []
 used_icsd_ids = []
 wrong_icsd_ids = []
-mp_rows = mpdf.to_dict('records')
+mp_rows = mpdf_idx.to_dict('records')
 for mp_row in mp_rows:
     if mp_row['icsd_ids']:
         for icsd_id in mp_row['icsd_ids']:
             try: ## sometimes the icsd_id doesn't exist
-                icsd_row = icsdf.loc[icsd_id].to_dict()
+                icsd_row = icsdf_idx.loc[icsd_id].to_dict()
                 used_icsd_ids.append(icsd_id)
             except KeyError as e:
                 wrong_icsd_ids.append(e)
@@ -51,7 +54,7 @@ for mp_row in mp_rows:
             tmp_dict['mp_'+k] = v
         combined_rows.append(tmp_dict)
 
-remaining_icsd_rows = icsdf.loc[~icsdf.index.isin(used_icsd_ids)].to_dict('records')
+remaining_icsd_rows = icsdf_idx.loc[~icsdf_idx.index.isin(used_icsd_ids)].to_dict('records')
 for icsd_row in remaining_icsd_rows:
     tmp_dict = {}
     for k,v in icsd_row.items():
@@ -61,60 +64,6 @@ for icsd_row in remaining_icsd_rows:
 super_df = pd.DataFrame(combined_rows)
 
 
-#%% USING UMAP
-import seaborn as sns
-
-umap_mpdf = mpdf[[
-    "band_gap",
-    "density",
-    "e_above_hull",
-    # "efermi",
-    # "encut",
-    # "energy",
-    "energy_per_atom",
-    # "final_energy",
-    # "final_energy_per_atom",
-    "formation_energy_per_atom",
-    # "nkpts",
-    # "nsites",
-    "total_magnetization",
-    "volume",
-    # "exchange_symmetry",
-    # "num_unique_magnetic_sites",
-    # "total_magnetization_normalized_vol",
-    # "total_magnetization_normalized_formula_units",
-    # "num_magnetic_sites",
-    # "true_total_magnetization",
-]].dropna()
-
-# sns.pairplot(umap_mpdf, hue='total_magnetization')
-
- ## %% UMAP
-from sklearn.preprocessing import StandardScaler
-import umap
-import matplotlib.pyplot as plt
-reducer = umap.UMAP()
-umap_data = umap_mpdf[[
-    "band_gap",
-    "density",
-    "e_above_hull",
-    "energy_per_atom",
-    # "total_magnetization",
-    "volume",
-]].values
-scaled_data = StandardScaler().fit_transform(umap_data)
-embedding = reducer.fit_transform(scaled_data)
-embedding.shape
-
-plt.scatter(
-    embedding[:, 0],
-    embedding[:, 1],
-    s=0.8,
-    c=umap_mpdf.total_magnetization
-)
-plt.gca().set_aspect('equal', 'datalim')
-plt.title('UMAP projection', fontsize=24)
-
 #%% PRINT BASIC INFO ABOUT THE DATASETS
 for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf, 'super':super_df}.items():
     print(f"\nloaded {len(dataset)} materials from {name}")
@@ -122,15 +71,11 @@ for name, dataset in {'MP':mpdf, 'OQMD':oqmdf, 'ICSD':icsdf, 'super':super_df}.i
     for column in list(dataset.columns): 
         print(" ",column)
 
-
 #%%
 icsd_mask = ~super_df['icsd__database_code_ICSD'].isna()
 mp_mask = ~super_df['mp_material_id'].isna()
 grouped_icsd = super_df.loc[icsd_mask & mp_mask].groupby('icsd__database_code_ICSD')
 grouped_mp = super_df.loc[icsd_mask & mp_mask].groupby('mp_material_id')
-
-
-#%% HOW MANY ICSD HAVE 4 MP ASSOCIATED
 
 
 #%%
@@ -358,9 +303,6 @@ mpdf.plot.scatter(x='e_above_hull', y='nelements')
 plt.show()
 
 
-#%%
-mpdf.columns
-
 #%% PLOTS_DIR ENERGY HUBBARD
 bins = 200
 prop = 'formation_energy_per_atom'
@@ -389,8 +331,8 @@ list_of_elements = [
 ]
 
 list_of_counts = [
-    mag_stable.elements[mpdf.elements.apply(lambda lst: el in lst)].count()
-    for el in list_of_elements
+    mag_stable.elements[mpdf.elements.apply(lambda lst: element in lst)].count()
+    for element in list_of_elements
 ]
 
 plt.figure(figsize=(20,4))
