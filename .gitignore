@@ -3,6 +3,7 @@
 *.feather
 *.pdf
 *.png
+.ipynb_checkpoints
 materials_datasets/icsd/icsd*.csv
 materials_datasets/icsd/icsd*.zip
 materials_datasets/icsd/icsd_credentials.json
