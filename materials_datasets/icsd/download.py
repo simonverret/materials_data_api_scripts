@@ -145,5 +145,5 @@ if __name__ == "__main__":
         credentials = json.load(f)
     usrname = credentials["loginid"]
     passwrd = credentials["password"]
-    download_all(usrname, passwrd, ICSD_PKL, 9,9)
+    download_all(usrname, passwrd, ICSD_PKL)
 
