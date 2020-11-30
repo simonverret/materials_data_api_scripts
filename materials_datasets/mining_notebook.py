@@ -91,7 +91,7 @@ def fraction_composition(s):
     return not ("." in s)
 
 int_sum_icsdf = icsdf.loc[ icsdf['_chemical_formula_sum'].apply(lambda s: not (("." in s) or ("(" in s))) ]
-print(f"{len(int_sum_icsdf)}/{len(icsdf)} materials from OQMD have no '.' in their sum formula")
+print(f"{len(int_sum_icsdf)}/{len(icsdf)} materials from ICSD have no '.' in their sum formula")
 int_struct_icsdf = icsdf.loc[ icsdf['_chemical_formula_structural'].apply(lambda s: not (("." in s) or ("(" in s))) ]
 print(f"{len(int_struct_icsdf)}/{len(icsdf)} materials from OQMD have no '.' in their structural formula")
 
