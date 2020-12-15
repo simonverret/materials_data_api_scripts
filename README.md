@@ -5,6 +5,8 @@ This repository contains python scripts and Jupyter notebooks to download and an
 - Open quantum materials database (OQMD)
 - Inorganic crystal structure database (ICSD)
 
+And provides a periodic table built from data coming from `mendeleev`, `ase`, `pymatgen`, `magpie`, `imat` and `wikipedia`.
+
 ##### Requirements
 
     pip install requests
@@ -29,9 +31,8 @@ Download all MP data with
 
 A `pandas.DataFrame` object will be saved in binary format in the file `mp/materials_project.pkl` This format is used because it can contain any python object, and it allows faster loading, saving and manipulations than `.csv` of `.json` format.
 
-See the Jupyter notebook for usage examples:
+See the `example_mp.ipynb`, `example_pca.ipynb`, and `example_mp_vs_icsd.ipynb` Jupyter notebooks for usage examples.
 
-    jupyter-notebook mp_examples.ipynb
 
 ## Inorganic crystal structure database (ICSD)
 Your ICSD credentials by creating a file `icsd/icsd_credentials.json` as
@@ -65,7 +66,8 @@ which will extract new columns :
 
 in a new `pandas.DataFrame` saved in `icsd/all_icsd_cifs_augmented.pkl` file. The data is also saved in a `.csv` files `icsd/icsd_formulas_all.csv`, but without the `cif` column. Two additional files are also saved, `icsd_formula_structural_integer.csv` and `icsd_formula_sum_integer.csv` which contain stochiometric compounds only.
 
-See the `icsd_examples.ipynb` Jupyter notebook for usage examples.
+See the `example_icsd.ipynb` and `example_mp_vs_icsd.ipynb` Jupyter notebooks for usage examples.
+
 
 ## Open quantum materials database (OQMD)
 
@@ -75,7 +77,16 @@ Download all of OQMD materials (can take up to a few days) with
 
 A `pandas.DataFrame` object will be saved in binary format in the file `oqmd/oqmd.pkl`.
 
-See the `oqmd_examples.ipynb` Jupyter notebook for usage examples.
+
+## Periodic table
+
+Build the periodic table with
+
+    python ptable/build.py
+
+A `pandas.DataFrame` object will be saved in binary format in the file `ptable/ptable.pkl`.
+
+See the `example_descriptors.ipynb` Jupyter notebook for usage examples.
 
 ---
 ## Notes
