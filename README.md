@@ -5,7 +5,7 @@ This repository contains python scripts and Jupyter notebooks to download and an
 - Open quantum materials database (OQMD)
 - Inorganic crystal structure database (ICSD)
 
-And provides a periodic table built from data coming from `mendeleev`, `ase`, `pymatgen`, `magpie`, `imat` and `wikipedia`.
+Periodic table data combined from `mendeleev`, `ase`, `pymatgen`, `magpie`, `imat` and `wikipedia` is also provided
 
 ##### Requirements
 
@@ -21,9 +21,7 @@ And provides a periodic table built from data coming from `mendeleev`, `ase`, `p
 ## Materials Project (MP)
 Add your your API key by creating a file `mp/api_key.json` as
 
-    {
-        "api_key": "********************"
-    }
+    echo '{"api_key":"******************"}' > mp/api_key.json
 
 Download all MP data with
 

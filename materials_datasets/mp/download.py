@@ -1,4 +1,5 @@
-#%%
+#!/usr/bin/env python3
+
 from pymatgen.ext.matproj import MPRester  ## to access MP database
 import pandas as pd  ## provides a fast spreadsheet object (DataFrame)
 from pathlib import Path  ## for os-agnostic paths

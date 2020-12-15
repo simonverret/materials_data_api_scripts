@@ -1,4 +1,5 @@
-#%%
+#!/usr/bin/env python3
+
 import warnings
 import glob
 from pathlib import Path  ## for os-agnostic paths

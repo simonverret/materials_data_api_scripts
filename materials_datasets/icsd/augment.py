@@ -1,6 +1,4 @@
-# materials_data_api_scripts 
-# Simon Verret, 2020
-#%%
+#!/usr/bin/env python3
 
 from pathlib import Path
 import pandas as pd
@@ -107,5 +105,3 @@ if __name__=="__main__":
     icsd_df_formulas_struct_int = icsd_df_no_cif.loc[icsd_df['_chemical_formula_structural'].apply(fraction_composition)]
     icsd_df_formulas_struct_int.to_csv(INT_FORMULA_STRUCT_CSV)    
     
-# icsd_df = pd.read_pickle("path/to/all_icsd_cifs_augmented.pkl")
-# int_icsd_df = icsd_df.loc[icsd_df['_chemical_formula_sum'].apply(lambda s: not (("." in s) or ("(" in s)))]

@@ -1,4 +1,5 @@
-#%% MAIN
+#!/usr/bin/env python3
+
 import time
 import json
 from pathlib import Path
@@ -175,40 +176,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-
-
-
-#%%  EXAMPLES OF THE RESPONSES OBJECT
-
-# query_dict = {
-#     "natom": "<100",
-#     "limit": "500"
-# }
-# with OQMD_multi_session() as oqmd:
-#     responses = oqmd.parallel_queries(query_dict, 16)
-# all_data = []
-# for response in responses:
-#     data = json.loads(response.text)
-#     all_data.extend(data["data"])
-# print(f"number of materials: {len(all_data)}")
-
-# #%%
-# responses[0].__dict__
-# list_of_dict = json.loads(responses[0].text)['data']  #list of dict of entries
-# dataframe = pd.DataFrame(list_of_dict)
-# dataframe['chemical_formula']
-
-# #%% WHAT THE DATA CONTAINS
-# data = json.loads(responses[0].text)
-# print(data["links"])
-# print(data["resource"])
-# print(data["meta"])
-# print(data["response_message"])
-# print(data["data"][0].keys())
-# print(f"next page : {data['links']['next']}")
-# print(f"number of materials: {len(data['data'])}")
-# # print(data['resource'])  # this one is empty
-# print(f"number of materials available: {data['meta']['data_available']}")
-# print(data["meta"]["more_data_available"])  # meta data about the request
-# # print(data['response_message'])  # simply contains 'OK'
