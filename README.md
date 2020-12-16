@@ -9,10 +9,10 @@ A periodic table combining data from `mendeleev`, `ase`, `pymatgen` and other cu
 
 #### Content of this Readme
 - [Requirements](##Requirements)  
-- [Materials Project (MP)](##Materials\ Project\ (MP))
-- [Inorganic crystal structure database (ICSD)](##Inorganic\ crystal\ structure\ database\ (ICSD))  
-- [Open quantum materials database (OQMD)](##Open\ quantum\ materials\ database\ (OQMD))
-- [Periodic table](##Periodic\ table)
+- [Materials Project (MP)](##Materials-Project-(MP))
+- [Inorganic crystal structure database (ICSD)](##Inorganic-crystal-structure-database-(ICSD))  
+- [Open quantum materials database (OQMD)](##Open-quantum-materials-database-(OQMD))
+- [Periodic table](##Periodic-table)
 - [References](##References)  
 
 ## Requirements
