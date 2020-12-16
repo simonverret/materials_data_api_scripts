@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-import pandas as pd
 import re  #regular expressions
 
+import pandas as pd
 
 HERE = Path(__file__).parent
 PARENT = Path(__file__).parent.parent

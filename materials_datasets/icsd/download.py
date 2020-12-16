@@ -129,6 +129,7 @@ def download_all(loginid, password, saved_file, min_N=1, max_N=22):
         id_list = []
         cif_list = []
         for N in range(min_N, max_N+1):
+            print(f"materials with {N} elements")
             id_list.extend(icsd.query_ids(f"NUMBEROFELEMENTS: {N}"))
             print(f"received {len(id_list)} ids")
             print("querying cifs")

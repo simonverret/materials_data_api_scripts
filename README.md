@@ -5,18 +5,34 @@ This repository contains python scripts and Jupyter notebooks to download and an
 - Open quantum materials database (OQMD)
 - Inorganic crystal structure database (ICSD)
 
-Periodic table data combined from `mendeleev`, `ase`, `pymatgen`, `magpie`, `imat` and `wikipedia` is also provided
+A periodic table combining data from `mendeleev`, `ase`, `pymatgen` and other custom descriptors is provided.
 
-##### Requirements
+#### Content of this Readme
+- [Requirements](##Requirements)  
+- [Materials Project (MP)](##Materials\ Project\ (MP))
+- [Inorganic crystal structure database (ICSD)](##Inorganic\ crystal\ structure\ database\ (ICSD))  
+- [Open quantum materials database (OQMD)](##Open\ quantum\ materials\ database\ (OQMD))
+- [Periodic table](##Periodic\ table)
+- [References](##References)  
+
+## Requirements
+
+The download scripts require
 
     pip install requests
-    pip install numpy
     pip install pandas
-    pip install matplotlib
     pip install jupyter
-    pip install pymatgen    # required for MP only
-    pip install asyncio     # required for OQMD only
-    pip install concurrent  # required for OQMD only
+    pip install pymatgen
+
+The notebooks require
+
+    pip install seaborn
+    pip install sklearn
+    pip install umap-learn
+    pip install mendeleev
+    pip install ase
+
+Note that the same version of Pandas must be used to save and load the `.pkl` [binary files](https://docs.python.org/3/library/pickle.html), otherwise you will get errors.
 
 ## Materials Project (MP)
 Add your your API key by creating a file `mp/api_key.json` as
@@ -27,18 +43,15 @@ Download all MP data with
 
     python mp/download.py
 
-A `pandas.DataFrame` object will be saved in binary format in the file `mp/materials_project.pkl` This format is used because it can contain any python object, and it allows faster loading, saving and manipulations than `.csv` of `.json` format.
+A `pandas.DataFrame` object will be saved as `mp/materials_project.pkl`.
 
-See the `example_mp.ipynb`, `example_pca.ipynb`, and `example_mp_vs_icsd.ipynb` Jupyter notebooks for usage examples.
+See the `example_mp.ipynb` and `example_pca.ipynb` Jupyter notebooks for usage examples.
 
 
 ## Inorganic crystal structure database (ICSD)
 Your ICSD credentials by creating a file `icsd/icsd_credentials.json` as
 
-    {
-        "loginid":"*********",
-        "password":"*****************"
-    }
+    echo '{"loginid":"**********","password":"****************"}' > icsd/icsd_credentials.json
 
 Download all ICSD `cif` strings with
 
@@ -64,14 +77,14 @@ which will extract new columns :
 
 in a new `pandas.DataFrame` saved in `icsd/all_icsd_cifs_augmented.pkl` file. The data is also saved in a `.csv` files `icsd/icsd_formulas_all.csv`, but without the `cif` column. Two additional files are also saved, `icsd_formula_structural_integer.csv` and `icsd_formula_sum_integer.csv` which contain stochiometric compounds only.
 
-See the `example_icsd.ipynb` and `example_mp_vs_icsd.ipynb` Jupyter notebooks for usage examples.
+See the `example_icsd.ipynb` Jupyter notebooks for usage examples (along with `example_mp_vs_icsd.ipynb` if you have MP downloaded).
 
 
 ## Open quantum materials database (OQMD)
 
 Download all of OQMD materials (can take up to a few days) with
 
-    python mp/download.py
+    python oqmd/download.py
 
 A `pandas.DataFrame` object will be saved in binary format in the file `oqmd/oqmd.pkl`.
 
@@ -87,7 +100,7 @@ A `pandas.DataFrame` object will be saved in binary format in the file `ptable/p
 See the `example_descriptors.ipynb` Jupyter notebook for usage examples.
 
 ---
-## Notes
+## References
 ##### Main MP documentation
 - https://materialsproject.org/open describes the various ways to acces the data. The present code used the pymatgen wrapper.
 ##### Main OQMD documentation:

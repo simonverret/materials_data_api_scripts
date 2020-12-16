@@ -10,7 +10,6 @@ materials_datasets/icsd/icsd_credentials.json
 materials_datasets/oqmd/oqmd*.csv
 materials_datasets/oqmd/oqmd*.zip
 materials_datasets/mp/mp*.zip
-materials_datasets/mp/subset_ids.csv
 materials_datasets/mp/citrine_MP_ICSD_compounds_PIFs.json
 materials_datasets/mp/api_key.json
 env

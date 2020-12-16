@@ -3,11 +3,11 @@
 import time
 import json
 from pathlib import Path
-import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import pandas as pd
 import asyncio
 
+import requests
+import pandas as pd
 
 HERE = Path(__file__).parent
 OQMD_PKL = str(HERE / "oqmd.pkl")
