@@ -8,12 +8,12 @@ This repository contains python scripts and Jupyter notebooks to download and an
 A periodic table combining data from `mendeleev`, `ase`, `pymatgen` and other custom descriptors is provided.
 
 #### Content of this Readme
-- [Requirements](##requirements)  
-- [Materials Project (MP)](##materials-project-(mp))
-- [Inorganic crystal structure database (ICSD)](##inorganic-crystal-structure-database-(icsd))  
-- [Open quantum materials database (OQMD)](##open-quantum-materials-database-(oqmd))
-- [Periodic table](##periodic-table)
-- [References](##references)  
+- [Requirements](#requirements)  
+- [Materials Project (MP)](#materials-project-(mp))
+- [Inorganic crystal structure database (ICSD)](#inorganic-crystal-structure-database-(icsd))  
+- [Open quantum materials database (OQMD)](#open-quantum-materials-database-(oqmd))
+- [Periodic table](#periodic-table)
+- [References](#references)  
 
 ## Requirements
 
