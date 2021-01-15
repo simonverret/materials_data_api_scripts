@@ -107,17 +107,16 @@ See the `example_descriptors.ipynb` Jupyter notebook for usage examples.
 - http://oqmd.org/static/docs/getting_started.html#setting-up-the-database provides a way to access materials: `qmpy-rester` but it is in `python 2.7`. Reading `qmpy`'s source code helped make the full download script with the `requests` python package to access web ressources.
 ##### Main ICSD API documentation:
 - https://icsd.fiz-karlsruhe.de/api/ is more of an GUI to the API. You can experiment with it and find what is accessible. The HTML queries can then be [translated](https://curl.trillworks.com) from `curl` to python package to access web ressources.
-##### ressources for REST:
+##### Resources for REST:
 - https://www.smashingmagazine.com/2018/01/understanding-using-rest-api/
 - then get lost and ask yourself how http works: https://medium.com/better-programming/writing-your-own-http-server-introduction-b2f94581268b
 - Useful curl to python translation: https://curl.trillworks.com
-##### other unsued ressources (kept here for reference):
+##### Unsued resources (kept here for reference):
 - data scraping: https://github.com/hegdevinayi/icsd-queryer
 - cambridge cristallographic data center: https://www.ccdc.cam.ac.uk/support-and-resources/support/case/?caseid=c344eefa-6b74-e811-91fa-005056975d8a
 - AIIDA database importer: https://aiida-core.readthedocs.io/en/stable/import_export/dbimporters/icsd.html. This one is interesting, but it requires an intranet version of the database.
 - re3data.org : https://www.re3data.org/repository/r3d100010085
 - matminer retreiver for MDF, MPDS, OQMD and MongoDB : https://hackingmaterials.lbl.gov/matminer/matminer.data_retrieval.html#
-
 ##### More databases which could be added to this repository
 - MDF: https://materialsdatafacility.org
 - MPDS: https://mpds.io/#start
