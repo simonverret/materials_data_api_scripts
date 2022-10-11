@@ -6,7 +6,10 @@ import requests
 import pandas as pd
 import urllib.parse
 import xml.etree.ElementTree as ET
+import datetime
 
+today = datetime.date.today()
+YEAR = today.year
 
 HERE = Path(__file__).parent
 ICSD_PKL = str(HERE/"icsd_cifs.pkl")
@@ -101,7 +104,7 @@ class ICSD_Session():
         query_headers = {'accept': 'application/cif'}
 
         query_results = self.raw_query(query_string, query_headers)
-        separator = "\n#(C) 2020 by FIZ Karlsruhe - Leibniz Institute for Information Infrastructure.  All rights reserved.\n"
+        separator = f"\n#(C) {YEAR} by FIZ Karlsruhe - Leibniz Institute for Information Infrastructure.  All rights reserved.\n"
         list_of_cifs = query_results.text.split(separator)[1:]  # the first entry is blank
         return list_of_cifs
 
